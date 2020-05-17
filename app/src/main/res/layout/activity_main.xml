@@ -7,7 +7,7 @@
     tools:context=".MainActivity"
     android:background="@color/colorBg">
 
-    <com.halfplatepoha.neomorph.NeumorphButton
+    <com.halfplatepoha.neomorph.view.NeumorphButton
         android:id="@+id/flat_image_view"
         style="@style/Widget.NeoMorph.Button"
         android:layout_width="100dp"
@@ -17,17 +17,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:nm_cornerSize="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <com.halfplatepoha.neomorph.view.NeumorphButton
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/flat_image_view"
-        android:clickable="true"
-        android:focusable="true"
-        android:stateListAnimator="@animator/neomorph_animation"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

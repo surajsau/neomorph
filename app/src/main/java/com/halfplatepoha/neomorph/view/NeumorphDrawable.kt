@@ -4,204 +4,337 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.*
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
-import kotlin.math.roundToInt
 
 class NeumorphDrawable : Drawable {
 
-    private var drawableState: State
+    private var drawableState: DrawableState
+
+    private var dirty = false
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         color = Color.TRANSPARENT
     }
+    private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        color = Color.TRANSPARENT
+    }
 
-    private var isShapeDirty = false
+    private val rectF = RectF()
 
-    private var shapePath: Path = Path()
+    private val outlinePath = Path()
+    private var shadow: IShadowRenderer? = null
 
-    private var shapeRenderer: ShapeRenderer? = null
+    constructor(context: Context) : this(Blurrer(context))
 
     constructor(
         context: Context,
         attrs: AttributeSet?,
         @AttrRes defStyleAttr: Int,
         @StyleRes defStyleRes: Int
-    ) : this()
+    ) : this(Blurrer(context))
 
-    internal constructor() : this(State())
+    internal constructor(blurrer: Blurrer) : this(
+        DrawableState(
+            blurrer
+        )
+    )
 
-    private constructor(drawableState: State) : super() {
+    private constructor(drawableState: DrawableState) : super() {
         this.drawableState = drawableState
-        this.shapeRenderer = ShapeRenderer(drawableState)
+        this.shadow =
+            ShadowRenderer(drawableState)
     }
 
-    override fun draw(canvas: Canvas) {
-        //.. main drawing logic
-        if(isShapeDirty) {
-            this.isShapeDirty = false
-
-            val bounds = RectF()
-            bounds.set(getInternalBounds())
-            calculatePath(bounds, this.shapePath)
-            shapeRenderer?.updateBounds(this.getInternalBounds())
-        }
-
-        if(hasFill())
-            drawFill(canvas)
-
-        shapeRenderer?.onDraw(canvas, this.shapePath)
-
-    }
-
-    private fun hasFill() = (this.drawableState.paintStyle == Paint.Style.FILL) or
-            (this.drawableState.paintStyle == Paint.Style.FILL_AND_STROKE)
-
-    private fun drawFill(canvas: Canvas) {
-        canvas.drawPath(this.shapePath, this.fillPaint)
-    }
-
-    private fun calculatePath(bounds: RectF, path: Path) {
-        val left = 0f
-        val top = 0f
-        val right = left + bounds.width()
-        val bottom = top + bounds.height()
-
-        val cornerSize = this.drawableState.cornerRadius
-
-        path.reset()
-        path.addRoundRect(left, top, right, bottom, cornerSize, cornerSize, Path.Direction.CW)
-        path.close()
-    }
-
-    private fun invalidate(ignoreShape: Boolean = false) {
-        this.isShapeDirty = ignoreShape.not()
-        super.invalidateSelf()
-    }
-
-    private fun getInternalBounds() = super.getBounds()
-
-    fun setLightShadowColor(color: Int) {
-        if(this.drawableState.lightShadowColor != color) {
-            this.drawableState.lightShadowColor = color
-            invalidate()
-        }
-    }
-
-    fun setDarkShadowColor(color: Int) {
-        if(this.drawableState.darkShadowColor != color) {
-            this.drawableState.darkShadowColor = color
-            invalidate()
-        }
-    }
-
-    fun setCornerRadius(cornerRadius: Float) {
-        if(this.drawableState.cornerRadius != cornerRadius) {
-            this.drawableState.cornerRadius = cornerRadius
-            invalidate()
-        }
-    }
-
-    override fun setAlpha(alpha: Int) {
-        //.. set alpha and invalidate
-        if(this.drawableState.alpha != alpha) {
-            this.drawableState.alpha = alpha
-            invalidate(ignoreShape = true)
-        }
+    override fun getConstantState(): ConstantState? {
+        return drawableState
     }
 
     override fun mutate(): Drawable {
-        val state = State(this.drawableState)
-        this.drawableState = state
-        this.shapeRenderer?.setDrawableState(state)
+        val newDrawableState =
+            DrawableState(
+                drawableState
+            )
+        drawableState = newDrawableState
+        shadow?.setDrawableState(newDrawableState)
         return this
+    }
+
+    fun setFillColor(fillColor: ColorStateList?) {
+        if (drawableState.fillColor != fillColor) {
+            drawableState.fillColor = fillColor
+            onStateChange(state)
+        }
     }
 
     override fun getOpacity(): Int {
         return PixelFormat.TRANSLUCENT
     }
 
+    override fun setAlpha(alpha: Int) {
+        if (drawableState.alpha != alpha) {
+            drawableState.alpha = alpha
+            invalidateSelfIgnoreShape()
+        }
+    }
+
     override fun setColorFilter(colorFilter: ColorFilter?) {
-        //.. do nothing
+        // not supported yet
     }
 
-    override fun onStateChange(state: IntArray?): Boolean {
-        val invalidated = updateColors(state)
-        if(invalidated)
-            invalidate()
-        return invalidated
+    private fun getBoundsInternal(): Rect {
+        return drawableState.padding?.let { padding ->
+            val bounds = super.getBounds()
+            Rect(
+                bounds.left + padding.left,
+                bounds.top + padding.top,
+                bounds.right - padding.right,
+                bounds.bottom - padding.bottom
+            )
+        } ?: super.getBounds()
     }
 
-    override fun onBoundsChange(bounds: Rect?) {
-        this.isShapeDirty = true
+    private fun getBoundsAsRectF(): RectF {
+        rectF.set(getBoundsInternal())
+        return rectF
+    }
+
+    fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
+        if (drawableState.padding == null) {
+            drawableState.padding = Rect()
+        }
+        drawableState.padding?.set(left, top, right, bottom)
+        invalidateSelf()
+    }
+
+    fun setShadowElevation(shadowElevation: Float) {
+        if (drawableState.shadowElevation != shadowElevation) {
+            drawableState.shadowElevation = shadowElevation
+            invalidateSelf()
+        }
+    }
+
+    fun setShadowColorLight(@ColorInt shadowColor: Int) {
+        if (drawableState.shadowColorLight != shadowColor) {
+            drawableState.shadowColorLight = shadowColor
+            invalidateSelf()
+        }
+    }
+
+    fun setShadowColorDark(@ColorInt shadowColor: Int) {
+        if (drawableState.shadowColorDark != shadowColor) {
+            drawableState.shadowColorDark = shadowColor
+            invalidateSelf()
+        }
+    }
+
+    fun getTranslationZ(): Float {
+        return drawableState.translationZ
+    }
+
+    fun setTranslationZ(translationZ: Float) {
+        if (drawableState.translationZ != translationZ) {
+            drawableState.translationZ = translationZ
+            invalidateSelfIgnoreShape()
+        }
+    }
+
+    override fun invalidateSelf() {
+        dirty = true
+        super.invalidateSelf()
+    }
+
+    private fun invalidateSelfIgnoreShape() {
+        super.invalidateSelf()
+    }
+
+    private fun hasFill(): Boolean {
+        return (drawableState.paintStyle === Paint.Style.FILL_AND_STROKE
+                || drawableState.paintStyle === Paint.Style.FILL)
+    }
+
+    private fun hasStroke(): Boolean {
+        return ((drawableState.paintStyle == Paint.Style.FILL_AND_STROKE
+                || drawableState.paintStyle == Paint.Style.STROKE)
+                && strokePaint.strokeWidth > 0)
+    }
+
+    override fun onBoundsChange(bounds: Rect) {
+        dirty = true
         super.onBoundsChange(bounds)
     }
 
-    override fun getOutline(outline: Outline) {
-        outline.setRoundRect(getInternalBounds(), this.drawableState.cornerRadius)
+    override fun draw(canvas: Canvas) {
+        val prevAlpha = fillPaint.alpha
+        fillPaint.alpha =
+            modulateAlpha(
+                prevAlpha,
+                drawableState.alpha
+            )
+
+        strokePaint.strokeWidth = drawableState.strokeWidth
+        val prevStrokeAlpha = strokePaint.alpha
+        strokePaint.alpha =
+            modulateAlpha(
+                prevStrokeAlpha,
+                drawableState.alpha
+            )
+
+        if (dirty) {
+            calculateOutlinePath(getBoundsAsRectF(), outlinePath)
+            shadow?.updateShadowBitmap(getBoundsInternal())
+            dirty = false
+        }
+
+        if (hasFill()) {
+            drawFillShape(canvas)
+        }
+
+        shadow?.draw(canvas, outlinePath)
+
+        if (hasStroke()) {
+            drawStrokeShape(canvas)
+        }
+
+        fillPaint.alpha = prevAlpha
+        strokePaint.alpha = prevStrokeAlpha
     }
 
-    private fun updateColors(state: IntArray?): Boolean {
-        var invalidate = false
-        this.drawableState.fillColor?.let {
-            val previousColor = this.fillPaint.color
-            val currentColor = it.getColorForState(state, previousColor)
+    private fun drawFillShape(canvas: Canvas) {
+        canvas.drawPath(outlinePath, fillPaint)
+    }
 
-            if(previousColor != currentColor) {
-                this.fillPaint.color = currentColor
-                invalidate = true
+    private fun drawStrokeShape(canvas: Canvas) {
+        canvas.drawPath(outlinePath, strokePaint)
+    }
+
+    fun getOutlinePath(): Path {
+        return outlinePath
+    }
+
+    private fun calculateOutlinePath(bounds: RectF, path: Path) {
+        val left = drawableState.padding?.left?.toFloat() ?: 0f
+        val top = drawableState.padding?.top?.toFloat() ?: 0f
+        val right = left + bounds.width()
+        val bottom = top + bounds.height()
+        path.reset()
+        val cornerSize = drawableState.cornerSize
+        path.addRoundRect(
+            left, top, right, bottom,
+            cornerSize, cornerSize,
+            Path.Direction.CW
+        )
+        path.close()
+    }
+
+    override fun getOutline(outline: Outline) {
+        val cornerSize = drawableState.cornerSize
+        outline.setRoundRect(getBoundsInternal(), cornerSize)
+    }
+
+    override fun isStateful(): Boolean {
+        return (super.isStateful()
+                || drawableState.fillColor?.isStateful == true)
+    }
+
+    override fun onStateChange(state: IntArray): Boolean {
+        val invalidateSelf = updateColorsForState(state)
+        if (invalidateSelf) {
+            invalidateSelf()
+        }
+        return invalidateSelf
+    }
+
+    private fun updateColorsForState(state: IntArray): Boolean {
+        var invalidateSelf = false
+        drawableState.fillColor?.let { fillColor ->
+            val previousFillColor: Int = fillPaint.color
+            val newFillColor: Int = fillColor.getColorForState(state, previousFillColor)
+            if (previousFillColor != newFillColor) {
+                fillPaint.color = newFillColor
+                invalidateSelf = true
             }
         }
-
-        return invalidate
+        drawableState.strokeColor?.let { strokeColor ->
+            val previousStrokeColor = strokePaint.color
+            val newStrokeColor = strokeColor.getColorForState(state, previousStrokeColor)
+            if (previousStrokeColor != newStrokeColor) {
+                strokePaint.color = newStrokeColor
+                invalidateSelf = true
+            }
+        }
+        return invalidateSelf
     }
 
-    fun setTranslationZ(z: Float) {
-        if(this.drawableState.translationZ != z) {
-            this.drawableState.translationZ = z
-            invalidate(ignoreShape = true)
+    fun setCornerSize(cornerSize: Float) {
+        if(this.drawableState.cornerSize != cornerSize) {
+            this.drawableState.cornerSize = cornerSize
+            invalidateSelf()
         }
     }
 
-    override fun isStateful(): Boolean = super.isStateful() || (this.drawableState.fillColor?.isStateful == true)
+    internal class DrawableState : ConstantState {
 
-    override fun getConstantState(): ConstantState? = this.drawableState
+        val blurrer: Blurrer
 
-    internal class State: ConstantState {
-
+        var padding: Rect? = null
         var fillColor: ColorStateList? = null
-        var lightShadowColor: Int = Color.WHITE
-        var darkShadowColor: Int = Color.BLACK
-        var alpha: Int = 255
-        var elevation: Float = 6f
-        var translationZ: Float = 10f
-        var cornerRadius: Float = 25f
+        var strokeColor: ColorStateList? = null
+        var strokeWidth = 0f
+
+        var cornerSize: Float = 0f
+
+        var alpha = 255
+
+        var shadowElevation: Float = 0f
+        var shadowColorLight: Int = Color.WHITE
+        var shadowColorDark: Int = Color.BLACK
+        var translationZ = 0f
+
+        var blurRadius: Int = 25
+
         var paintStyle: Paint.Style = Paint.Style.FILL_AND_STROKE
 
-        constructor() {
-
+        constructor(blurrer: Blurrer) {
+            this.blurrer = blurrer
         }
 
-        constructor(orig: State) {
+        constructor(orig: DrawableState) {
+            blurrer = orig.blurrer
             alpha = orig.alpha
-            elevation = orig.elevation
-            lightShadowColor = orig.lightShadowColor
-            darkShadowColor = orig.darkShadowColor
+            shadowElevation = orig.shadowElevation
+            shadowColorLight = orig.shadowColorLight
+            shadowColorDark = orig.shadowColorDark
             fillColor = orig.fillColor
+            strokeColor = orig.strokeColor
+            strokeWidth = orig.strokeWidth
             paintStyle = orig.paintStyle
+            if (orig.padding != null) {
+                padding = Rect(orig.padding)
+            }
         }
 
         override fun newDrawable(): Drawable {
             return NeumorphDrawable(this).apply {
-                this.isShapeDirty = true
+                // Force the calculation of the path for the new drawable.
+                dirty = true
             }
         }
 
-        override fun getChangingConfigurations(): Int = 0
-
+        override fun getChangingConfigurations(): Int {
+            return 0
+        }
     }
 
+    companion object {
+
+        private fun modulateAlpha(paintAlpha: Int, alpha: Int): Int {
+            val scale = alpha + (alpha ushr 7) // convert to 0..256
+            return paintAlpha * scale ushr 8
+        }
+    }
 }

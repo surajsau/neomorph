@@ -6,28 +6,35 @@ import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
 
-fun Bitmap.onCanvas(block: Canvas.() -> Unit) = this.also {
+fun Bitmap.onCanvas(block: Canvas.() -> Unit): Bitmap = this.also {
     Canvas(it).run(block)
 }
 
-fun Canvas.withTranslate(x: Float, y: Float, block: Canvas.() -> Unit) {
-    val save = save()
+fun Canvas.withTranslation(x: Float = 0f, y: Float = 0f, block: Canvas.() -> Unit) {
+    val previousState = save()
     translate(x, y)
-    block()
-    restoreToCount(save)
+
+    try {
+        block()
+    } finally {
+        restoreToCount(previousState)
+    }
 }
 
-fun Canvas.withClipOut(path: Path, block: Canvas.() -> Unit) {
-    val save = save()
-    clipOutPathCompat(path)
-    block()
-    restoreToCount(save)
+fun Canvas.withClipOut(clipPath: Path, block: Canvas.() -> Unit) {
+    val previousState = save()
+    clipOutPathCompat(clipPath)
+    try {
+        block()
+    } finally {
+        restoreToCount(previousState)
+    }
 }
 
-fun Canvas.clipOutPathCompat(path: Path) {
+fun Canvas.clipOutPathCompat(clipPath: Path) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        clipOutPath(path)
+        clipOutPath(clipPath)
     } else {
-        clipPath(path, Region.Op.DIFFERENCE)
+        clipPath(clipPath, Region.Op.DIFFERENCE)
     }
 }

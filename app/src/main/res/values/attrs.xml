@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="colorShadowLight" format="color"/>
+    <attr name="colorShadowDark" format="color"/>
+    <attr name="nm_cornerSize" format="dimension"/>
+
+    <attr name="nm_fillColor" format="color" />
+    <attr name="nm_elevation" format="dimension" />
+
+    <declare-styleable name="NeumorphButton">
+        <attr name="nm_fillColor" />
+        <attr name="nm_elevation" />
+        <attr name="colorShadowDark" />
+        <attr name="colorShadowLight" />
+        <attr name="nm_cornerSize" />
+    </declare-styleable>
+</resources>

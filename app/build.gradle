@@ -8,12 +8,19 @@ android {
 
     defaultConfig {
         applicationId "com.halfplatepoha.neomorph"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
+        renderscriptTargetApi 19
+        renderscriptSupportModeEnabled true
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 
     buildTypes {
