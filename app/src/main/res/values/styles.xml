@@ -9,15 +9,11 @@
     </style>
 
     <style name="Widget.NeoMorph.Button" parent="android:Widget">
-        <item name="android:padding">12dp</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceButton</item>
-        <item name="android:stateListAnimator">@animator/neomorph_animation</item>
-        <item name="android:focusable">true</item>
-        <item name="android:clickable">true</item>
-        <item name="android:gravity">center_vertical|center_horizontal</item>
-        <item name="nm_elevation">6dp</item>
         <item name="colorShadowLight">@color/shadowLight</item>
         <item name="colorShadowDark">@color/shadowDark</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center</item>
     </style>
 
 </resources>
