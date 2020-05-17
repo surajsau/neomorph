@@ -6,6 +6,7 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import com.halfplatepoha.neomorph.R
 import com.halfplatepoha.neomorph.view.core.NeumorphDrawable
+import com.halfplatepoha.neomorph.view.core.RENDERER_TYPE_OUTER
 
 class NeumorphButton @JvmOverloads constructor(
     context: Context,
@@ -34,6 +35,7 @@ class NeumorphButton @JvmOverloads constructor(
             ContextCompat.getColor(context, R.color.shadowDark)
         )
         val cornerSize = a.getDimension(R.styleable.Neumorph_nm_cornerSize, 0f)
+        val type = a.getInteger(R.styleable.Neumorph_nm_type, RENDERER_TYPE_OUTER)
         a.recycle()
 
         drawable = NeumorphDrawable(
@@ -47,6 +49,7 @@ class NeumorphButton @JvmOverloads constructor(
             setShadowColorDark(shadowColorDark)
             setCornerSize(cornerSize)
             setFillColor(fillColor)
+            setRendererType(type)
 
             val left = paddingLeft
             val top = paddingTop

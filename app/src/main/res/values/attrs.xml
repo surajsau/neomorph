@@ -7,6 +7,11 @@
 
     <attr name="nm_fillColor" format="color" />
     <attr name="nm_elevation" format="dimension" />
+    <attr name="nm_type" format="enum">
+        <enum name="outerShadow" value="1" />
+        <enum name="innerShadow" value="0" />
+        <enum name="combined" value="2" />
+    </attr>
 
     <declare-styleable name="Neumorph">
         <attr name="nm_fillColor" />
@@ -14,5 +19,6 @@
         <attr name="colorShadowDark" />
         <attr name="colorShadowLight" />
         <attr name="nm_cornerSize" />
+        <attr name="nm_type" />
     </declare-styleable>
 </resources>

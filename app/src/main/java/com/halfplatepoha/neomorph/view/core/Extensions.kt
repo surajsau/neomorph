@@ -7,6 +7,7 @@ import android.graphics.Region
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 
+
 internal fun GradientDrawable.setCornerShape(drawableState: NeumorphDrawable.DrawableState) {
     shape = GradientDrawable.RECTANGLE
     cornerRadii = drawableState.cornerSize.let {
@@ -37,10 +38,23 @@ fun Canvas.withClipOut(clipPath: Path, block: Canvas.() -> Unit) = runWithRestor
     block()
 }
 
+fun Canvas.withClip(clipPath: Path, block: Canvas.() -> Unit) = runWithRestore {
+    clipPathCompat(clipPath)
+    block()
+}
+
 fun Canvas.clipOutPathCompat(clipPath: Path) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         clipOutPath(clipPath)
     } else {
         clipPath(clipPath, Region.Op.DIFFERENCE)
+    }
+}
+
+fun Canvas.clipPathCompat(clipPath: Path) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        clipPath(clipPath)
+    } else {
+        clipPath(clipPath, Region.Op.INTERSECT)
     }
 }

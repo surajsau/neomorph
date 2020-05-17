@@ -9,7 +9,7 @@ import android.graphics.drawable.GradientDrawable
 import com.halfplatepoha.neomorph.view.core.NeumorphDrawable.DrawableState
 import kotlin.math.roundToInt
 
-internal class ShadowRenderer(private var drawableState: DrawableState) :
+internal class OuterShadowRenderer(private var drawableState: DrawableState) :
     IShadowRenderer {
 
     private var lightShadowBitmap: Bitmap? = null
@@ -25,16 +25,10 @@ internal class ShadowRenderer(private var drawableState: DrawableState) :
         canvas.withClipOut(outlinePath) {
             val elevation = drawableState.shadowElevation
             val z = drawableState.shadowElevation + drawableState.translationZ
-            val left: Float
-            val top: Float
-            val padding = drawableState.padding
-            if (padding != null) {
-                left = padding.left.toFloat()
-                top = padding.top.toFloat()
-            } else {
-                left = 0f
-                top = 0f
-            }
+            val (left, top) = drawableState.padding?.let {
+                Pair(it.left.toFloat(), it.right.toFloat())
+            } ?: Pair(0f, 0f)
+
             lightShadowBitmap?.let {
                 val offset = -elevation - z
                 drawBitmap(it, offset + left, offset + top, null)
@@ -78,6 +72,6 @@ internal class ShadowRenderer(private var drawableState: DrawableState) :
                     draw(this)
                 }
             }
-            .blurred(this@ShadowRenderer.drawableState.blurRadius)
+            .blurred(this@OuterShadowRenderer.drawableState.blurRadius)
     }
 }

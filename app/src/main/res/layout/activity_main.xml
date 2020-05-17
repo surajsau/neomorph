@@ -4,22 +4,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@color/colorBg">
+    android:background="@color/colorBg"
+    tools:context=".MainActivity">
 
     <com.halfplatepoha.neomorph.view.NeumorphButton
         android:id="@+id/square_button"
         style="@style/Widget.NeoMorph.Button"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:text="Hi"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:nm_cornerSize="75dp"
-        app:nm_elevation="8dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:padding="16dp"
         android:stateListAnimator="@animator/neomorph_animation"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:text="Hi"
+        app:layout_constraintBottom_toTopOf="@+id/square_button_inner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:nm_cornerSize="50dp"
+        app:nm_elevation="8dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.halfplatepoha.neomorph.view.NeumorphButton
+        android:id="@+id/square_button_inner"
+        style="@style/Widget.NeoMorph.Button"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="16dp"
+        android:stateListAnimator="@animator/neomorph_animation"
+        android:text="Hi"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/square_button"
+        app:nm_cornerSize="50dp"
+        app:nm_type="innerShadow"
+        app:nm_elevation="8dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

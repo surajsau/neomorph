@@ -27,7 +27,7 @@ class NeumorphDrawable : Drawable {
     private val rectF = RectF()
 
     private val outlinePath = Path()
-    private var shadow: IShadowRenderer? = null
+    private var shadowRenderer: IShadowRenderer? = null
 
     constructor(context: Context) : this(
         Blurrer(
@@ -42,16 +42,17 @@ class NeumorphDrawable : Drawable {
         @StyleRes defStyleRes: Int
     ) : this(Blurrer(context))
 
-    internal constructor(blurrer: Blurrer) : this(
-        DrawableState(
-            blurrer
-        )
-    )
+    internal constructor(blurrer: Blurrer) : this(DrawableState(blurrer))
 
     private constructor(drawableState: DrawableState) : super() {
         this.drawableState = drawableState
-        this.shadow =
-            ShadowRenderer(drawableState)
+        this.shadowRenderer = getShadowRenderer(drawableState)
+    }
+
+    private fun getShadowRenderer(drawableState: DrawableState) = when(drawableState.type) {
+        RENDERER_TYPE_OUTER -> OuterShadowRenderer(drawableState)
+        RENDERER_TYPE_INNER -> InnerShadowRenderer(drawableState)
+        else -> throw IllegalArgumentException("Wrong renderer type ${drawableState.type}")
     }
 
     override fun getConstantState(): ConstantState? {
@@ -64,7 +65,7 @@ class NeumorphDrawable : Drawable {
                 drawableState
             )
         drawableState = newDrawableState
-        shadow?.setDrawableState(newDrawableState)
+        shadowRenderer?.setDrawableState(newDrawableState)
         return this
     }
 
@@ -82,7 +83,7 @@ class NeumorphDrawable : Drawable {
     override fun setAlpha(alpha: Int) {
         if (drawableState.alpha != alpha) {
             drawableState.alpha = alpha
-            invalidateSelfIgnoreShape()
+            invalidate(ignoreShape = true)
         }
     }
 
@@ -112,47 +113,47 @@ class NeumorphDrawable : Drawable {
             drawableState.padding = Rect()
         }
         drawableState.padding?.set(left, top, right, bottom)
-        invalidateSelf()
+        invalidate()
     }
 
     fun setShadowElevation(shadowElevation: Float) {
         if (drawableState.shadowElevation != shadowElevation) {
             drawableState.shadowElevation = shadowElevation
-            invalidateSelf()
+            invalidate()
         }
     }
 
     fun setShadowColorLight(@ColorInt shadowColor: Int) {
         if (drawableState.shadowColorLight != shadowColor) {
             drawableState.shadowColorLight = shadowColor
-            invalidateSelf()
+            invalidate()
         }
     }
 
     fun setShadowColorDark(@ColorInt shadowColor: Int) {
         if (drawableState.shadowColorDark != shadowColor) {
             drawableState.shadowColorDark = shadowColor
-            invalidateSelf()
+            invalidate()
         }
-    }
-
-    fun getTranslationZ(): Float {
-        return drawableState.translationZ
     }
 
     fun setTranslationZ(translationZ: Float) {
         if (drawableState.translationZ != translationZ) {
             drawableState.translationZ = translationZ
-            invalidateSelfIgnoreShape()
+            invalidate(ignoreShape = true)
+        }
+    }
+    
+    fun setRendererType(rendererType: Int) {
+        if(drawableState.type != rendererType) {
+            drawableState.type = rendererType
+            this.shadowRenderer = getShadowRenderer(drawableState)
+            invalidate()
         }
     }
 
-    override fun invalidateSelf() {
-        dirty = true
-        super.invalidateSelf()
-    }
-
-    private fun invalidateSelfIgnoreShape() {
+    private fun invalidate(ignoreShape: Boolean = false) {
+        this.dirty = ignoreShape.not()
         super.invalidateSelf()
     }
 
@@ -190,7 +191,7 @@ class NeumorphDrawable : Drawable {
 
         if (dirty) {
             calculateOutlinePath(getBoundsAsRectF(), outlinePath)
-            shadow?.updateShadowBitmap(getBoundsInternal())
+            shadowRenderer?.updateShadowBitmap(getBoundsInternal())
             dirty = false
         }
 
@@ -198,7 +199,7 @@ class NeumorphDrawable : Drawable {
             drawFillShape(canvas)
         }
 
-        shadow?.draw(canvas, outlinePath)
+        shadowRenderer?.draw(canvas, outlinePath)
 
         if (hasStroke()) {
             drawStrokeShape(canvas)
@@ -214,10 +215,6 @@ class NeumorphDrawable : Drawable {
 
     private fun drawStrokeShape(canvas: Canvas) {
         canvas.drawPath(outlinePath, strokePaint)
-    }
-
-    fun getOutlinePath(): Path {
-        return outlinePath
     }
 
     private fun calculateOutlinePath(bounds: RectF, path: Path) {
@@ -248,7 +245,7 @@ class NeumorphDrawable : Drawable {
     override fun onStateChange(state: IntArray): Boolean {
         val invalidateSelf = updateColorsForState(state)
         if (invalidateSelf) {
-            invalidateSelf()
+            invalidate()
         }
         return invalidateSelf
     }
@@ -277,12 +274,13 @@ class NeumorphDrawable : Drawable {
     fun setCornerSize(cornerSize: Float) {
         if (this.drawableState.cornerSize != cornerSize) {
             this.drawableState.cornerSize = cornerSize
-            invalidateSelf()
+            invalidate()
         }
     }
 
     internal class DrawableState : ConstantState {
 
+        var type: Int = RENDERER_TYPE_OUTER
         val blurrer: Blurrer
 
         var padding: Rect? = null

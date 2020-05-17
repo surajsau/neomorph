@@ -7,6 +7,6 @@
     <color name="colorBg">#EFEEEE</color>
     <color name="colorButton">#ECF0F3</color>
 
-    <color name="shadowLight">#D9FFFFFF</color>
+    <color name="shadowLight">#80FFFFFF</color>
     <color name="shadowDark">#D9D9D9</color>
 </resources>
