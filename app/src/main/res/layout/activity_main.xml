@@ -30,12 +30,28 @@
         android:padding="16dp"
         android:stateListAnimator="@animator/neomorph_animation"
         android:text="Hi"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/square_button_combined"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/square_button"
         app:nm_cornerSize="50dp"
         app:nm_type="innerShadow"
+        app:nm_elevation="8dp" />
+
+    <com.halfplatepoha.neomorph.view.NeumorphButton
+        android:id="@+id/square_button_combined"
+        style="@style/Widget.NeoMorph.Button"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="16dp"
+        android:stateListAnimator="@animator/neomorph_animation"
+        android:text="Hi"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/square_button_inner"
+        app:nm_cornerSize="50dp"
+        app:nm_type="combined"
         app:nm_elevation="8dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

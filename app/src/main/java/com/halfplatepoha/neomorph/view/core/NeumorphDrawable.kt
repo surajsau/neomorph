@@ -52,6 +52,7 @@ class NeumorphDrawable : Drawable {
     private fun getShadowRenderer(drawableState: DrawableState) = when(drawableState.type) {
         RENDERER_TYPE_OUTER -> OuterShadowRenderer(drawableState)
         RENDERER_TYPE_INNER -> InnerShadowRenderer(drawableState)
+        RENDERER_TYPE_COMBINED -> InnerOuterShadowRenderer(drawableState)
         else -> throw IllegalArgumentException("Wrong renderer type ${drawableState.type}")
     }
 
