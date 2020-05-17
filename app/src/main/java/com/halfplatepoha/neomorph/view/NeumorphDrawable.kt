@@ -19,15 +19,11 @@ class NeumorphDrawable : Drawable {
         color = Color.TRANSPARENT
     }
 
-    private val lightShadowDrawable = GradientDrawable()
-    private val darkShadowDrawable = GradientDrawable()
-
-    private var lightShadowBitmap: Bitmap? = null
-    private var darkShadowBitmap: Bitmap? = null
-
     private var isShapeDirty = false
 
     private var shapePath: Path = Path()
+
+    private var shapeRenderer: ShapeRenderer? = null
 
     constructor(
         context: Context,
@@ -40,6 +36,7 @@ class NeumorphDrawable : Drawable {
 
     private constructor(drawableState: State) : super() {
         this.drawableState = drawableState
+        this.shapeRenderer = ShapeRenderer(drawableState)
     }
 
     override fun draw(canvas: Canvas) {
@@ -50,15 +47,14 @@ class NeumorphDrawable : Drawable {
             val bounds = RectF()
             bounds.set(getInternalBounds())
             calculatePath(bounds, this.shapePath)
-            updateShadowBounds(this.getInternalBounds())
+            shapeRenderer?.updateBounds(this.getInternalBounds())
         }
 
         if(hasFill())
             drawFill(canvas)
 
-        canvas.withClipOut(this.shapePath) {
-            redrawShadows(this)
-        }
+        shapeRenderer?.onDraw(canvas, this.shapePath)
+
     }
 
     private fun hasFill() = (this.drawableState.paintStyle == Paint.Style.FILL) or
@@ -86,70 +82,7 @@ class NeumorphDrawable : Drawable {
         super.invalidateSelf()
     }
 
-    private fun redrawShadows(canvas: Canvas) {
-        val z = this.drawableState.elevation + this.drawableState.translationZ
-        val elevation = this.drawableState.elevation
-
-        val lightShadowOffset = -elevation - z
-        val darkShadowOffset = -elevation + z
-
-        val left = 0f
-        val top = 0f
-
-        this.lightShadowBitmap?.let {
-            canvas.drawBitmap(it, left + lightShadowOffset, top + lightShadowOffset, null)
-        }
-
-        this.darkShadowBitmap?.let {
-            canvas.drawBitmap(it, left + darkShadowOffset, top + darkShadowOffset, null)
-        }
-    }
-
     private fun getInternalBounds() = super.getBounds()
-
-    private fun updateShadowBounds(bounds: Rect) {
-
-        val elevation = this.drawableState.elevation
-
-        fun GradientDrawable.toRoundedCorners(radius: Float?) {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadii = radius?.let {
-                floatArrayOf(it, it, it, it, it, it, it, it)
-            }
-        }
-
-        this.lightShadowDrawable.apply {
-            setColor(Color.BLUE)
-            toRoundedCorners(this@NeumorphDrawable.drawableState.cornerRadius)
-        }
-
-        this.darkShadowDrawable.apply {
-            setColor(Color.RED)
-            toRoundedCorners(this@NeumorphDrawable.drawableState.cornerRadius)
-        }
-
-        val width = bounds.width()
-        val height = bounds.height()
-
-        this.lightShadowDrawable.setSize(width, height)
-        this.lightShadowDrawable.setBounds(0, 0, width, height)
-        this.darkShadowDrawable.setSize(width, height)
-        this.darkShadowDrawable.setBounds(0, 0, width, height)
-
-        val actualWidth = (width + 2 * elevation).roundToInt()
-        val actualHeight = (height + 2 * elevation).roundToInt()
-
-        this.lightShadowBitmap = lightShadowDrawable.getBitmap(actualWidth, actualHeight)
-        this.darkShadowBitmap = darkShadowDrawable.getBitmap(actualWidth, actualHeight)
-    }
-
-    private fun Drawable.getBitmap(width: Int, height: Int): Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        .onCanvas {
-            val elevation = this@NeumorphDrawable.drawableState.elevation
-            withTranslate(elevation, elevation) {
-                draw(this)
-            }
-        }
 
     fun setLightShadowColor(color: Int) {
         if(this.drawableState.lightShadowColor != color) {
@@ -165,6 +98,13 @@ class NeumorphDrawable : Drawable {
         }
     }
 
+    fun setCornerRadius(cornerRadius: Float) {
+        if(this.drawableState.cornerRadius != cornerRadius) {
+            this.drawableState.cornerRadius = cornerRadius
+            invalidate()
+        }
+    }
+
     override fun setAlpha(alpha: Int) {
         //.. set alpha and invalidate
         if(this.drawableState.alpha != alpha) {
@@ -176,6 +116,7 @@ class NeumorphDrawable : Drawable {
     override fun mutate(): Drawable {
         val state = State(this.drawableState)
         this.drawableState = state
+        this.shapeRenderer?.setDrawableState(state)
         return this
     }
 

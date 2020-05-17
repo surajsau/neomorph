@@ -17,6 +17,7 @@ class NeumorphButton @JvmOverloads constructor(context: Context,
         drawable = NeumorphDrawable(context, attrs, defStyleAttr, 0).apply {
             setDarkShadowColor(ContextCompat.getColor(context, android.R.color.holo_blue_dark))
             setLightShadowColor(ContextCompat.getColor(context, android.R.color.holo_green_dark))
+            setCornerRadius(50f)
         }
         setBackgroundDrawable(drawable)
     }
