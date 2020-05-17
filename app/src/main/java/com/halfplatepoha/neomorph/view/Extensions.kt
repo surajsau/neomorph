@@ -4,16 +4,22 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Path
 import android.graphics.Region
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
+
+internal fun GradientDrawable.setCornerShape(drawableState: NeumorphDrawable.DrawableState) {
+    shape = GradientDrawable.RECTANGLE
+    cornerRadii = drawableState.cornerSize.let {
+        floatArrayOf(it, it, it, it, it, it, it, it)
+    }
+}
 
 fun Bitmap.onCanvas(block: Canvas.() -> Unit): Bitmap = this.also {
     Canvas(it).run(block)
 }
 
-fun Canvas.withTranslation(x: Float = 0f, y: Float = 0f, block: Canvas.() -> Unit) {
+private fun Canvas.runWithRestore(block: Canvas.() -> Unit) {
     val previousState = save()
-    translate(x, y)
-
     try {
         block()
     } finally {
@@ -21,14 +27,14 @@ fun Canvas.withTranslation(x: Float = 0f, y: Float = 0f, block: Canvas.() -> Uni
     }
 }
 
-fun Canvas.withClipOut(clipPath: Path, block: Canvas.() -> Unit) {
-    val previousState = save()
+fun Canvas.withTranslation(x: Float = 0f, y: Float = 0f, block: Canvas.() -> Unit) = runWithRestore {
+    translate(x, y)
+    block()
+}
+
+fun Canvas.withClipOut(clipPath: Path, block: Canvas.() -> Unit) = runWithRestore {
     clipOutPathCompat(clipPath)
-    try {
-        block()
-    } finally {
-        restoreToCount(previousState)
-    }
+    block()
 }
 
 fun Canvas.clipOutPathCompat(clipPath: Path) {

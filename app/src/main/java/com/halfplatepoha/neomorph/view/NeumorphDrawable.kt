@@ -38,11 +38,7 @@ class NeumorphDrawable : Drawable {
         @StyleRes defStyleRes: Int
     ) : this(Blurrer(context))
 
-    internal constructor(blurrer: Blurrer) : this(
-        DrawableState(
-            blurrer
-        )
-    )
+    internal constructor(blurrer: Blurrer) : this(DrawableState(blurrer))
 
     private constructor(drawableState: DrawableState) : super() {
         this.drawableState = drawableState
@@ -271,7 +267,7 @@ class NeumorphDrawable : Drawable {
     }
 
     fun setCornerSize(cornerSize: Float) {
-        if(this.drawableState.cornerSize != cornerSize) {
+        if (this.drawableState.cornerSize != cornerSize) {
             this.drawableState.cornerSize = cornerSize
             invalidateSelf()
         }

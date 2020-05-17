@@ -46,21 +46,12 @@ internal class ShadowRenderer(private var drawableState: DrawableState) : IShado
     }
 
     override fun updateShadowBitmap(bounds: Rect) {
-        fun GradientDrawable.setCornerShape(drawableState: DrawableState) {
-            shape = GradientDrawable.RECTANGLE
-            cornerRadii = drawableState.cornerSize.let {
-                floatArrayOf(it, it, it, it, it, it, it, it)
-            }
-        }
 
-        lightShadowDrawable.apply {
-            setColor(drawableState.shadowColorLight)
-            setCornerShape(drawableState)
-        }
-        darkShadowDrawable.apply {
-            setColor(drawableState.shadowColorDark)
-            setCornerShape(drawableState)
-        }
+        lightShadowDrawable.apply { setColor(drawableState.shadowColorLight) }
+            .setCornerShape(drawableState)
+
+        darkShadowDrawable.apply { setColor(drawableState.shadowColorDark) }
+            .setCornerShape(drawableState)
 
         val w = bounds.width()
         val h = bounds.height()
