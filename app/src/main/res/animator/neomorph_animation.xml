@@ -5,7 +5,7 @@
         <set>
             <objectAnimator
                 android:duration="100"
-                android:valueTo="-5dp"
+                android:valueTo="-6dp"
                 android:valueType="floatType"
                 android:propertyName="translationZ"
                 android:interpolator="@android:interpolator/linear"/>

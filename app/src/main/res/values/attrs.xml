@@ -8,7 +8,7 @@
     <attr name="nm_fillColor" format="color" />
     <attr name="nm_elevation" format="dimension" />
 
-    <declare-styleable name="NeumorphButton">
+    <declare-styleable name="Neumorph">
         <attr name="nm_fillColor" />
         <attr name="nm_elevation" />
         <attr name="colorShadowDark" />

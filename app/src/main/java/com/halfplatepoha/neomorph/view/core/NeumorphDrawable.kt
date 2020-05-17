@@ -1,4 +1,4 @@
-package com.halfplatepoha.neomorph.view
+package com.halfplatepoha.neomorph.view.core
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -29,7 +29,11 @@ class NeumorphDrawable : Drawable {
     private val outlinePath = Path()
     private var shadow: IShadowRenderer? = null
 
-    constructor(context: Context) : this(Blurrer(context))
+    constructor(context: Context) : this(
+        Blurrer(
+            context
+        )
+    )
 
     constructor(
         context: Context,
@@ -38,7 +42,11 @@ class NeumorphDrawable : Drawable {
         @StyleRes defStyleRes: Int
     ) : this(Blurrer(context))
 
-    internal constructor(blurrer: Blurrer) : this(DrawableState(blurrer))
+    internal constructor(blurrer: Blurrer) : this(
+        DrawableState(
+            blurrer
+        )
+    )
 
     private constructor(drawableState: DrawableState) : super() {
         this.drawableState = drawableState

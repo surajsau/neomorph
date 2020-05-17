@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import com.halfplatepoha.neomorph.R
+import com.halfplatepoha.neomorph.view.core.NeumorphDrawable
 
 class NeumorphButton @JvmOverloads constructor(
     context: Context,
@@ -18,24 +19,29 @@ class NeumorphButton @JvmOverloads constructor(
     init {
         val a = context.obtainStyledAttributes(
             attrs,
-            R.styleable.NeumorphButton,
+            R.styleable.Neumorph,
             defStyleAttr,
             defStyleRes
         )
-        val fillColor = a.getColorStateList(R.styleable.NeumorphButton_nm_fillColor)
-        val shadowElevation = a.getDimension(R.styleable.NeumorphButton_nm_elevation, 0f)
+        val fillColor = a.getColorStateList(R.styleable.Neumorph_nm_fillColor)
+        val shadowElevation = a.getDimension(R.styleable.Neumorph_nm_elevation, 0f)
         val shadowColorLight = a.getColor(
-            R.styleable.NeumorphButton_colorShadowLight,
+            R.styleable.Neumorph_colorShadowLight,
             ContextCompat.getColor(context, R.color.shadowLight)
         )
         val shadowColorDark = a.getColor(
-            R.styleable.NeumorphButton_colorShadowDark,
+            R.styleable.Neumorph_colorShadowDark,
             ContextCompat.getColor(context, R.color.shadowDark)
         )
-        val cornerSize = a.getDimension(R.styleable.NeumorphButton_nm_cornerSize, 0f)
+        val cornerSize = a.getDimension(R.styleable.Neumorph_nm_cornerSize, 0f)
         a.recycle()
 
-        drawable = NeumorphDrawable(context, attrs, defStyleAttr, defStyleRes).apply {
+        drawable = NeumorphDrawable(
+            context,
+            attrs,
+            defStyleAttr,
+            defStyleRes
+        ).apply {
             setShadowElevation(shadowElevation)
             setShadowColorLight(shadowColorLight)
             setShadowColorDark(shadowColorDark)

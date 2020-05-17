@@ -1,4 +1,4 @@
-package com.halfplatepoha.neomorph.view
+package com.halfplatepoha.neomorph.view.core
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -6,10 +6,11 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import com.halfplatepoha.neomorph.view.NeumorphDrawable.DrawableState
+import com.halfplatepoha.neomorph.view.core.NeumorphDrawable.DrawableState
 import kotlin.math.roundToInt
 
-internal class ShadowRenderer(private var drawableState: DrawableState) : IShadowRenderer {
+internal class ShadowRenderer(private var drawableState: DrawableState) :
+    IShadowRenderer {
 
     private var lightShadowBitmap: Bitmap? = null
     private var darkShadowBitmap: Bitmap? = null

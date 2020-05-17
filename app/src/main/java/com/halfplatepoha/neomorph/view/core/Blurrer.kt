@@ -1,4 +1,4 @@
-package com.halfplatepoha.neomorph.view
+package com.halfplatepoha.neomorph.view.core
 
 import android.content.Context
 import android.graphics.*

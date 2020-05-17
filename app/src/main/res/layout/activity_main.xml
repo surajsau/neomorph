@@ -8,48 +8,18 @@
     android:background="@color/colorBg">
 
     <com.halfplatepoha.neomorph.view.NeumorphButton
-        android:id="@+id/rectangle_button"
+        android:id="@+id/square_button"
         style="@style/Widget.NeoMorph.Button"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:text="Hello!"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:text="Hi"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:nm_cornerSize="10dp"
-        app:nm_elevation="6dp"
-        android:padding="12dp"
+        app:nm_cornerSize="75dp"
+        app:nm_elevation="8dp"
+        android:padding="16dp"
         android:stateListAnimator="@animator/neomorph_animation"
-        app:layout_constraintBottom_toTopOf="@id/square_button"/>
-
-    <com.halfplatepoha.neomorph.view.NeumorphButton
-        android:id="@+id/square_button"
-        style="@style/Widget.NeoMorph.Button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="Hi"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rectangle_button"
-        app:nm_cornerSize="20dp"
-        app:nm_elevation="6dp"
-        android:padding="12dp"
-        android:stateListAnimator="@animator/neomorph_animation"
-        app:layout_constraintBottom_toTopOf="@id/circle_button"/>
-
-    <com.halfplatepoha.neomorph.view.NeumorphButton
-        android:id="@+id/circle_button"
-        style="@style/Widget.NeoMorph.Button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="Hi"
-        app:nm_cornerSize="50dp"
-        app:nm_elevation="10dp"
-        android:padding="20dp"
-        android:stateListAnimator="@animator/neomorph_animation_10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/square_button"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
